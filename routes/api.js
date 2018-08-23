@@ -36,9 +36,7 @@ router.get('/casetype', async function(req, res, next) {
             .api(`/sites/${siteID}/lists/${listID}/items`)
             .expand('fields')
             .get()).value
-
-            res.status('200').send(listItems);
-
+            res.status('200').send(JSON.stringify(listItems));
         }catch(err){
             res.status('404').send(err.message);
         };
