@@ -29,7 +29,7 @@ router.get('/casetype', async function(req, res, next) {
             
             const listID = (await client
             .api(`/sites/${siteID}/lists`)
-            .filter(`displayName eq 'CaseCategory'`)
+            .filter(`displayName eq '${process.env.CASE_CATEGORY_NAME}`)
             .get()).value[0].id
                 
             let listItems = (await client
