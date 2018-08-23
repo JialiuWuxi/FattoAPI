@@ -23,7 +23,7 @@ router.get('/casetype', async function(req, res, next) {
 
             //Get the Site ID
             const siteID = (await client
-            .api(`/sites/${rootName}:/sites/${process.env.SITE_NAME}`)
+            .api(`/sites/${rootName}:/sites/LT`)
             .select('id')
             .get()).id
             
