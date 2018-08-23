@@ -3,7 +3,7 @@ const router = express.Router();
 const graph = require('@microsoft/microsoft-graph-client');
 
 router.get('/', function(req, res, next) {
-    res.status('200').send();
+    res.status('200').send('Empty Get');
 });
 
 router.get('/casetype', async function(req, res, next) {
