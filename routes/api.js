@@ -55,6 +55,7 @@ router.get('/branches', function(req, res, next) {
 
 router.get('/departments', function(req, res, next) {
     const authToken = getTokenFromHeader(req);
+    const branchid = req.query.branchid;
 
     if(authToken){
         const client = graph.Client.init({
@@ -63,7 +64,7 @@ router.get('/departments', function(req, res, next) {
             }
         });
 
-        getListItems(client, process.env.SITE_NAME, process.env.DEPARTMENT_LIST_NAME).then(result => {
+        getListItems(client, process.env.SITE_NAME, process.env.DEPARTMENT_LIST_NAME, 'branchid', branchid).then(result => {
             if(result) {
                 res.status('200').send(result);
             }else{
@@ -79,6 +80,7 @@ router.get('/departments', function(req, res, next) {
 
 router.get('/employees', function(req, res, next) {
     const authToken = getTokenFromHeader(req);
+    const employeeDepartmentid = req.query.departmentid;
 
     if(authToken){
         const client = graph.Client.init({
@@ -87,7 +89,7 @@ router.get('/employees', function(req, res, next) {
             }
         });
 
-        getListItems(client, process.env.SITE_NAME, process.env.EMPLOYEE_LIST_NAME).then(result => {
+        getListItems(client, process.env.SITE_NAME, process.env.EMPLOYEE_LIST_NAME, 'departmentid', employeeDepartmentid).then(result => {
             if(result) {
                 res.status('200').send(result);
             }else{
@@ -98,10 +100,9 @@ router.get('/employees', function(req, res, next) {
     }else{
         res.status('401').send('empty token');
     }
-
 });
 
-async function getListItems(client, siteName, listName) {
+async function getListItems(client, siteName, listName, filterName, filterValue) {
     try{
         //Get root name
         const rootName = (await client
@@ -118,12 +119,21 @@ async function getListItems(client, siteName, listName) {
         .api(`/sites/${siteID}/lists`)
         .filter(`displayName eq '${listName}'`)
         .get()).value[0].id
-            
-        let listItems = await client
-        .api(`/sites/${siteID}/lists/${listID}/items`)
-        .expand('fields')
-        .get()
-        return listItems;
+        
+        if(filterValue && filterName){
+            let listItems = await client
+            .api(`/sites/${siteID}/lists/${listID}/items`)
+            .filter(`fields/${filterName} eq ${filterValue}`)
+            .expand('fields')
+            .get()
+            return listItems;
+        }else{
+            let listItems = await client
+            .api(`/sites/${siteID}/lists/${listID}/items`)
+            .expand('fields')
+            .get()
+            return listItems;
+        }
     }catch(err){
         console.log(err);
         return undefined;
