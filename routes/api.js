@@ -92,7 +92,7 @@ router.get('/employees', function(req, res, next) {
 
         getListItems(client, process.env.SITE_NAME, process.env.EMPLOYEE_LIST_NAME, 'departmentid', employeeDepartmentid)
         .then(result => res.status('200').send(result))
-        .catch(res.status('400'.send(err)));
+        .catch(err => res.status('400'.send(err)));
 
     }else{
         res.status('401').send('empty token');
