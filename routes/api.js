@@ -7,7 +7,8 @@ router.get('/', function(req, res, next) {
 });
 
 router.get('/casetype', async function(req, res, next) {
-    const authToken = getTokenFromHeader(req, res);
+    const authToken = getTokenFromHeader(req);
+
     if(authToken){
         const client = graph.Client.init({
             authProvider: (done) => {
@@ -41,16 +42,13 @@ router.get('/casetype', async function(req, res, next) {
             res.status('404').send(err.message);
         };
     }else{
-        
+        res.status('401').send('empty token');
     }
 
-    
 });
 
 
-
-
-function getTokenFromHeader(req, res) {
+function getTokenFromHeader(req) {
     let authToken = req.get('Authorization');
     if(authToken){
         let authTokenArray = authToken.split(' ');
@@ -61,7 +59,6 @@ function getTokenFromHeader(req, res) {
         }
         return authToken;
     }else{
-        res.status('401').send('please login first');
         return undefined;
     }
 }
