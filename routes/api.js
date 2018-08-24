@@ -71,7 +71,7 @@ router.get('/departments', function(req, res, next) {
             }else{
                 res.status('400').send('not recourse');
             }
-        })
+        });
 
     }else{
         res.status('401').send('empty token');
@@ -90,13 +90,9 @@ router.get('/employees', function(req, res, next) {
             }
         });
 
-        getListItems(client, process.env.SITE_NAME, process.env.EMPLOYEE_LIST_NAME, 'departmentid', employeeDepartmentid).then(result => {
-            if(result) {
-                res.status('200').send(result);
-            }else{
-                res.status('400').send('not recourse');
-            }
-        })
+        getListItems(client, process.env.SITE_NAME, process.env.EMPLOYEE_LIST_NAME, 'departmentid', employeeDepartmentid)
+        .then(result => res.status('200').send(result))
+        .catch(res.status('400'.send(err)));
 
     }else{
         res.status('401').send('empty token');
@@ -136,8 +132,7 @@ async function getListItems(client, siteName, listName, filterName, filterValue)
             return listItems;
         }
     }catch(err){
-        console.log(err);
-        return undefined;
+        throw err;
     };
 }
 
