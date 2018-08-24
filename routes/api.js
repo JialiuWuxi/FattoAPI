@@ -16,13 +16,9 @@ router.get('/casetype', function(req, res, next) {
             }
         });
 
-        getListItems(client, process.env.SITE_NAME, process.env.CASE_CATEGORY_NAME).then(result => {
-            if(result) {
-                res.status('200').send(result);
-            }else{
-                res.status('400').send('not recourse');
-            }
-        })
+        getListItems(client, process.env.SITE_NAME, process.env.CASE_CATEGORY_NAME)
+        .then(result => res.status('200').send(result))
+        .catch(err => res.status(err.statusCode).send(err));
 
     }else{
         res.status('401').send('empty token');
@@ -39,13 +35,9 @@ router.get('/branches', function(req, res, next) {
             }
         });
 
-        getListItems(client, process.env.SITE_NAME, process.env.BRANCH_LIST_NAME).then(result => {
-            if(result) {
-                res.status('200').send(result);
-            }else{
-                res.status('400').send('not recourse');
-            }
-        })
+        getListItems(client, process.env.SITE_NAME, process.env.BRANCH_LIST_NAME)
+        .then(result => res.status('200').send(result))
+        .catch(err => res.status(err.statusCode).send(err));
 
         
     }else{
@@ -65,13 +57,9 @@ router.get('/departments', function(req, res, next) {
             }
         });
 
-        getListItems(client, process.env.SITE_NAME, process.env.DEPARTMENT_LIST_NAME, 'branchid', branchid).then(result => {
-            if(result) {
-                res.status('200').send(result);
-            }else{
-                res.status('400').send('not recourse');
-            }
-        });
+        getListItems(client, process.env.SITE_NAME, process.env.DEPARTMENT_LIST_NAME, 'branchid', branchid)
+        .then(result => res.status('200').send(result))
+        .catch(err => res.status(err.statusCode).send(err));
 
     }else{
         res.status('401').send('empty token');
@@ -92,7 +80,7 @@ router.get('/employees', function(req, res, next) {
 
         getListItems(client, process.env.SITE_NAME, process.env.EMPLOYEE_LIST_NAME, 'departmentid', employeeDepartmentid)
         .then(result => res.status('200').send(result))
-        .catch(err => res.status('400').send(err));
+        .catch(err => res.status(err.statusCode).send(err));
 
     }else{
         res.status('401').send('empty token');
