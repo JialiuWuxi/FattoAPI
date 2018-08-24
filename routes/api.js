@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const graph = require('@microsoft/microsoft-graph-client');
 
+
 router.get('/', function(req, res, next) {
     res.status('200').send('Empty Get');
 });
@@ -59,10 +60,6 @@ router.get('/departments', function(req, res, next) {
 
         getListItems(client, process.env.SITE_NAME, process.env.DEPARTMENT_LIST_NAME, 'branchid', branchid)
         .then(result => res.status('200')
-        .set({
-            'Access-Control-Allow-Origin': '*',
-            'Content-Type': 'application/json',
-        })
         .send(result))
         .catch(err => res.status(err.statusCode).send(err));
 
