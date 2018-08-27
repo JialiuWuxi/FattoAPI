@@ -91,7 +91,6 @@ router.get('/employees', function(req, res, next) {
 
 router.get('/clients', function(req, res, next) {
     const authToken = getTokenFromHeader(req);
-    const clientName = req.query.clientname;
 
     if(authToken){
         const client = graph.Client.init({
@@ -100,7 +99,7 @@ router.get('/clients', function(req, res, next) {
             }
         });
 
-        getListItems(client, process.env.SITE_NAME, process.env.CLIENT_LIST_NAME, 'Title', clientName)
+        getListItems(client, process.env.SITE_NAME, process.env.CLIENT_LIST_NAME)
         .then(result => res.status('200').send(result))
         .catch(err => res.status(err.statusCode).send(err));
 
