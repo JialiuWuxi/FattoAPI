@@ -130,6 +130,70 @@ router.post('/clients', function(req, res, next) {
     }
 });
 
+router.get('/matters', function(req, res, next) {
+    const authToken = getTokenFromHeader(req);
+    const clientInfor = req.body;
+
+    if(authToken){
+        const client = graph.Client.init({
+            authProvider: (done) => {
+              done(null, authToken);
+            }
+        });
+        getListItems(client, process.env.SITE_NAME, process.env.MATTER_LIST_NAME)
+        .then(result => res.status('200').send(result))
+        .catch(err => res.status(err.statusCode).send(err));
+    }else{
+        res.status('401').send('empty token');
+
+
+    }       
+
+});
+
+router.post('/matters', function(req, res, next) {
+    const authToken = getTokenFromHeader(req);
+    const clientInfor = req.body;
+
+    if(authToken){
+        const client = graph.Client.init({
+            authProvider: (done) => {
+              done(null, authToken);
+            }
+        });    
+        //需要添加重复创建判断
+        saveListItems(client, process.env.SITE_NAME, process.env.MATTER_LIST_NAME, clientInfor)
+        .then(result => res.status('200').send(result))
+        .catch(err => res.status(err.statusCode || '500').send(err));
+
+    }else{
+        res.status('401').send('empty token');
+    }
+});
+
+router.get('/me', async function(req, res, next) {
+    const authToken = getTokenFromHeader(req);
+    const clientInfor = req.body;    
+
+    if(authToken){
+        const client = graph.Client.init({
+            authProvider: (done) => {
+              done(null, authToken);
+            }
+        });
+        const me = (await client
+            .api(`/me`)
+            .get());
+        res.status('200').send(me);
+
+    }else{
+        res.status('401').send('empty token');    
+    }
+});
+
+
+
+
 
 
 async function getListItems(client, siteName, listName, filterName, filterValue) {
