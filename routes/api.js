@@ -191,7 +191,77 @@ router.get('/me', async function(req, res, next) {
     }
 });
 
+router.post('/guest', async function(req, res, next) {
+    const authToken = getTokenFromHeader(req);
+    const clientInfor = req.body;    
 
+    if(authToken){
+        const client = graph.Client.init({
+            authProvider: (done) => {
+              done(null, authToken);
+            }
+        });
+        const data = {};
+        data.invitedUserDisplayName = clientInfor.guestDisplayName;
+        data.invitedUserEmailAddress = clientInfor.guestEmailAddress;
+        data.inviteRedirectUrl = 'https://m365x937980.sharepoint.com';
+        data.sendInvitationMessage = false;
+
+
+        const resback = await client.api('/invitations').post(data);
+
+
+        res.status('200').send(resback);
+    }else{
+        res.status('401').send('empty token')
+    }
+});
+
+router.post('/groups', async function(req, res, next){
+    const authToken = getTokenFromHeader(req);
+    const clientInfor = req.body;    
+
+    if(authToken){
+        const client = graph.Client.init({
+            authProvider: (done) => {
+              done(null, authToken);
+            }
+        });
+        const data = {};
+        data.displayName = clientInfor.displayName;
+        data.mailEnabled = clientInfor.mailEnabled;
+        data.mailNickname = clientInfor.mailNickname;
+        data.securityEnabled = clientInfor.securityEnabled;
+
+
+        const resback = await client.api('/groups').post(data);
+
+
+        res.status('200').send(resback);
+    }else{
+        res.status('401').send('empty token')
+    }
+});
+
+router.get('/groups', async function(req, res, next){
+    const authToken = getTokenFromHeader(req);
+    const query = req.query;
+ 
+    if(authToken){
+        const client = graph.Client.init({
+            authProvider: (done) => {
+              done(null, authToken);
+            }
+        });
+        const groups = (await client
+            .api(`/groups`)
+            .get());
+        res.status('200').send(groups);
+
+    }else{
+        res.status('401').send('empty token');    
+    }
+});
 
 
 
