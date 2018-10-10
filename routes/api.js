@@ -230,14 +230,16 @@ router.post('/groups', async function(req, res, next){
         const data = {};
         data.displayName = clientInfor.displayName;
         data.mailEnabled = clientInfor.mailEnabled;
-        data.mailNickname = clientInfor.mailNickname;
+        data.mailNickname = encodeURIComponent(clientInfor.displayName);
         data.securityEnabled = clientInfor.securityEnabled;
 
+        try{
+            const resback = await client.api('/groups').post(data);
+            res.status('200').send(resback);
+        }catch(err){
+            throw err;
+        }
 
-        const resback = await client.api('/groups').post(data);
-
-
-        res.status('200').send(resback);
     }else{
         res.status('401').send('empty token')
     }
@@ -245,24 +247,31 @@ router.post('/groups', async function(req, res, next){
 
 router.get('/groups', async function(req, res, next){
     const authToken = getTokenFromHeader(req);
-    const query = req.query;
+    const searchItem = req.query.search;
  
-    if(authToken){
+    if(authToken && searchItem){
         const client = graph.Client.init({
             authProvider: (done) => {
               done(null, authToken);
             }
         });
-        const groups = (await client
-            .api(`/groups`)
-            .get());
-        res.status('200').send(groups);
-
+        try{
+            //get the group id filter by name
+            const groupID = (await client
+                .api(`/groups`)
+                .filter(`displayName eq '${encodeURIComponent(searchItem)}'`)
+                .get()).value[0].id;
+            const groupMemberOf = (await client
+                .api(`/groups/${groupID}/members`)
+                .get());
+            res.status('200').send(groupMemberOf);
+        }catch (err) {
+            res.status('401').send(err);  
+        }
     }else{
-        res.status('401').send('empty token');    
+        res.status('401').send('empty token or search');    
     }
 });
-
 
 
 
