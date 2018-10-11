@@ -191,7 +191,7 @@ router.get('/me', async function(req, res, next) {
     }
 });
 
-router.post('/guest', async function(req, res, next) {
+router.post('/guests', async function(req, res, next) {
     const authToken = getTokenFromHeader(req);
     const clientInfor = req.body;    
 
@@ -207,34 +207,8 @@ router.post('/guest', async function(req, res, next) {
         data.inviteRedirectUrl = 'https://m365x937980.sharepoint.com';
         data.sendInvitationMessage = false;
 
-
-        const resback = await client.api('/invitations').post(data);
-
-
-        res.status('200').send(resback);
-    }else{
-        res.status('401').send('empty token')
-    }
-});
-
-router.post('/groups', async function(req, res, next){
-    const authToken = getTokenFromHeader(req);
-    const clientInfor = req.body;    
-
-    if(authToken){
-        const client = graph.Client.init({
-            authProvider: (done) => {
-              done(null, authToken);
-            }
-        });
-        const data = {};
-        data.displayName = clientInfor.displayName;
-        data.mailEnabled = clientInfor.mailEnabled;
-        data.mailNickname = encodeURIComponent(clientInfor.displayName);
-        data.securityEnabled = clientInfor.securityEnabled;
-
         try{
-            const resback = await client.api('/groups').post(data);
+            const resback = await client.api('/invitations').post(data);
             res.status('200').send(resback);
         }catch(err){
             throw err;
@@ -245,9 +219,52 @@ router.post('/groups', async function(req, res, next){
     }
 });
 
+router.post('/groups', async function(req, res, next){
+    const authToken = getTokenFromHeader(req);
+    const addMemberGroupID = req.query.addMember;
+    const clientInfor = req.body;    
+
+    if(authToken && addMemberGroupID){
+        const client = graph.Client.init({
+            authProvider: (done) => {
+              done(null, authToken);
+            }
+        });
+
+        try{
+            const resback = await client
+            .api(`/groups/${addMemberGroupID}/members/$ref`)
+            .post(clientInfor)
+            res.status('200').send(resback);
+        }catch(err){
+            throw err;
+        }
+    }else if(authToken){
+        const client = graph.Client.init({
+            authProvider: (done) => {
+              done(null, authToken);
+            }
+        });
+        const data = {};
+        data.displayName = clientInfor.displayName;
+        data.mailEnabled = clientInfor.mailEnabled;
+        data.mailNickname = encodeURIComponent(clientInfor.displayName);
+        data.securityEnabled = clientInfor.securityEnabled;
+        try{
+            const resback = await client.api('/groups').post(data);
+            res.status('200').send(resback);
+        }catch(err){
+            throw err;
+        }
+    }else{
+        res.status('401').send('empty token')
+    }
+});
+
 router.get('/groups', async function(req, res, next){
     const authToken = getTokenFromHeader(req);
     const searchItem = req.query.search;
+    const orderbyItem = req.query.orderby;
  
     if(authToken && searchItem){
         const client = graph.Client.init({
@@ -268,9 +285,50 @@ router.get('/groups', async function(req, res, next){
         }catch (err) {
             res.status('401').send(err);  
         }
+    }else if(authToken && orderbyItem){
+        const client = graph.Client.init({
+            authProvider: (done) => {
+              done(null, authToken);
+            }
+        });
+        try{
+            //get the group id filter by name
+            const groupID = (await client
+                .api(`/groups`)
+                .filter(`displayName eq '${encodeURIComponent(orderbyItem)}'`)
+                .get()).value[0].id;
+            res.status('200').send(groupID);
+        }catch (err) {
+            res.status('401').send(err);  
+        }
     }else{
         res.status('401').send('empty token or search');    
     }
+});
+
+router.get('/users', async function(req, res, next){
+    const authToken = getTokenFromHeader(req);
+    const userName = req.query.userName;
+
+    if(authToken && userName){
+        const client = graph.Client.init({
+            authProvider: (done) => {
+              done(null, authToken);
+            }
+        });
+        try{
+            const userID = (await client
+                .api(`/users`)
+                .filter(`displayName eq '${userName}'`)
+                .get()).value[0].id;
+            res.status('200').send(userID);
+        }catch(err){
+            throw(err);
+        }
+    }else{
+        res.status('401').send('empty token'); 
+    }
+
 });
 
 
