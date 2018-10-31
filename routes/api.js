@@ -51,7 +51,7 @@ router.get('/departments', function(req, res, next) {
     const authToken = getTokenFromHeader(req);
     const branchid = req.query.branchid;
 
-    if(authToken){
+    if(authToken && branchid){
         const client = graph.Client.init({
             authProvider: (done) => {
               done(null, authToken);
@@ -64,7 +64,7 @@ router.get('/departments', function(req, res, next) {
         .catch(err => res.status(err.statusCode).send(err));
 
     }else{
-        res.status('401').send('empty token');
+        res.status('401').send('empty token or miss branchid');
     }
 
 });
